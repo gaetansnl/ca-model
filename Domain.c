@@ -16,7 +16,7 @@ size_t domainArraySize(int width, int height) {
 	Obtient un nouveau domaine
 */
 Domain *domainCreate(int width, int height) {
-	Domain *r = malloc(sizeof(Domain) + domainArraySize(width, height));
+	Domain *r = calloc(1, sizeof(Domain) + domainArraySize(width, height));
 	r->width = width;
 	r->height = height;
 
