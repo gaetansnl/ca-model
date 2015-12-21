@@ -52,7 +52,7 @@ TransitionsExecResult te_run(
 				*/
 
 				if (watchEpoch) {
-					TransitionsEpochProgression p = {y * domain->height + x + 1, domain->height * domain->width };
+					TransitionsEpochProgression p = {y * domain->height + x + 1, domain->height * domain->width, epoch };
 					(*epochWatch)(domain, p);
 				}
 			}

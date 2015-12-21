@@ -14,6 +14,7 @@ typedef enum{
 typedef struct {
 	 int current;
 	 int maximum;
+	 int epoch;
 } TransitionsEpochProgression;
 
 typedef struct {	
