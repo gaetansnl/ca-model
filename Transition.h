@@ -17,11 +17,8 @@ typedef struct {
 } TransitionsEpochProgression;
 
 typedef struct {	
-	// Infos
 	int timeStep;
-	TransitionsEpochProgression epochProgression;
 
-	//Control
 	TransitionsExecState state;
 } TransitionsExecControl;
 
@@ -37,5 +34,6 @@ TransitionsExecResult te_run(
 	Domain *domain,
 	TransitionsConfig config,
 	int(*transitionFunction)(domainCellValue, Neighborhood*),
-	void(*controlFunction)(Domain*, TransitionsExecControl*)
+	void(*controlFunction)(Domain*, TransitionsExecControl*),
+	void(*epochWatch)(Domain*, TransitionsEpochProgression)
 );
