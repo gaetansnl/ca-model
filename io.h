@@ -1,0 +1,2 @@
+char getOneChar();
+int yesno();
