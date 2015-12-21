@@ -4,10 +4,17 @@
 #include "Domain.h"
 #include "Error.h"
 
+/*Helper Function
+	Obtient la taille du tableau representant le domaine
+*/
+
 size_t domainArraySize(int width, int height) {
 	return width * sizeof(domainCellType*) + width * height * sizeof(domainCellType);
 }
 
+/*
+	Obtient un nouveau domaine
+*/
 Domain *domainCreate(int width, int height) {
 	Domain *r = malloc(sizeof(Domain) + domainArraySize(width, height));
 	r->width = width;
@@ -23,6 +30,9 @@ Domain *domainCreate(int width, int height) {
 	return r;
 }
 
+/*
+	Obtient une copie du domaine precise
+*/
 Domain *domainCopy(Domain *domain) {
 	Domain *r = domainCreate(domain->width, domain->height);
 
@@ -37,10 +47,16 @@ Domain *domainCopy(Domain *domain) {
 	return r;
 }
 
+/*
+	Domain dispose
+*/
 void domainFree(Domain *domain) {
 	free(domain);
 }
 
+/*
+	Obtient la cellule du domaine aux coordonnees specifiees
+*/
 domainCell domainGetCell(domainCellCoord p, Domain *domain){
 	if (domainIsOutside(p, domain)) {
 		fatalError("domainCellCoord not in domain");
@@ -54,6 +70,9 @@ domainCell domainGetCell(domainCellCoord p, Domain *domain){
 	return c;
 }
 
+/*
+	Obtient la valeur de la cellule aux coordonnees specifiees
+*/
 domainCellValue domainGetCellValue(domainCellCoord p, Domain *domain) {
 	if (domainIsOutside(p, domain)) {
 		fatalError("domainCellCoord not in domain");
@@ -66,14 +85,9 @@ domainCellValue domainGetCellValue(domainCellCoord p, Domain *domain) {
 	return c;
 }
 
-//void domainSetCell(domainCellCoord p, domainCellType value, Domain *domain) {
-//	if (p.x >= domain->width || p.y >= domain->height) {
-//		fatalError("domainCellCoord not in domain");
-//	}
-//
-//	*(domain->array + p.x + domain->width * p.y) = value;
-//}
-
+/*
+	Obtient si la la cellule aux coordonnees specifiees est dans le domaine specifie
+*/
 int domainIsOutside(domainCellCoord coord, Domain *domain) {
 	return coord.x > domain->width || coord.x < 0 || coord.y > domain->height || coord.y < 0;
 }
