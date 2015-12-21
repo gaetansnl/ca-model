@@ -279,3 +279,5 @@ $RECYCLE.BIN/
 
 # Windows shortcuts
 *.lnk
+ConsoleApplication4.vcxproj
+ConsoleApplication4.vcxproj.filters
