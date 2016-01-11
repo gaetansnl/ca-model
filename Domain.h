@@ -38,6 +38,7 @@ typedef struct {
 Domain *domainCreate(int width, int height);
 void domainFree(Domain *domain);
 Domain *domainCopy(Domain *domain);
+int domainCompare(Domain *domain, Domain *source);
 
 domainCell domainGetCell(domainCellCoord p, Domain *domain);
 domainCellValue domainGetCellValue(domainCellCoord p, Domain *domain);

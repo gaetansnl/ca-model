@@ -91,3 +91,21 @@ domainCellValue domainGetCellValue(domainCellCoord p, Domain *domain) {
 int domainIsOutside(domainCellCoord coord, Domain *domain) {
 	return coord.x > domain->width || coord.x < 0 || coord.y > domain->height || coord.y < 0;
 }
+
+int domainCompare(Domain *domain, Domain *source) {
+	if ((domain->width != source->width) || (domain->height != source->height)) {
+		fatalError("domainCompare size not equal");
+	}
+
+	for (size_t i = 0; i < domain->width; i++)
+	{
+		for (size_t j = 0; j < domain->height; j++)
+		{
+			if (domain->array[i][j] != source->array[i][j]) {
+				return 0;
+			}
+		}
+	}
+
+	return 1;
+}
