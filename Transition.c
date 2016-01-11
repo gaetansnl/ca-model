@@ -58,9 +58,21 @@ TransitionsExecResult te_run(
 			}
 		}
 
-		domainFree(nbdDomain);
+		if (domainCompare(domain, nbdDomain)) {
+			control.state = FINISHED;
+		}
+		else {
+			if (controlFunction != NULL) {
+				(*controlFunction)(domain, &control);
+			}
+			epoch++;
+		}
 
-		(*controlFunction)(domain, &control);
-		epoch++;
-	}	
+		domainFree(nbdDomain);
+	}
+
+	TransitionsExecResult result;
+	result.state = control.state;
+
+	return result;
 }
