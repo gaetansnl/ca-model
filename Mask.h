@@ -1,3 +1,3 @@
 #pragma once
 
-typedef int MaskType 
+typedef int MaskType;
