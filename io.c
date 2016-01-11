@@ -6,5 +6,17 @@ char getOneChar() {
 	return c;
 }
 int yesno() {
-	return getOneChar() == 'y';
+	switch (getOneChar())
+	{
+		case 'y':
+			return 1;
+		break;
+		case 'n':
+			return 0;
+			break;
+	default:
+		printf("Reponse invalide. Entrez y/n \n");
+		return yesno();
+		break;
+	}
 }
