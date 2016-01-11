@@ -24,6 +24,8 @@ typedef enum neighborhoodPosition {
 	nbd_LEFT =         0b00001000
 } neighborhoodPosition;
 
+#define nbd_VON_NEUMANN 0b01011010;
+
 typedef struct nbdNeighbor {
 	int mask;
 	domainCellValue cellValue;
@@ -37,3 +39,8 @@ typedef struct Neighborhood {
 
 Neighborhood *createNeighborhood(Domain *domain, domainCellCoord domainCellCoord, int mask);
 void freeNeighborhood(Neighborhood * neighborhood);
+
+int nbdCountByValue(Neighborhood *neighborhood, domainCellType value);
+domainCellType nbdGetMaxValue(Neighborhood *neighborhood);
+int nbdIsNeighborEquals(Neighborhood *neighborhood, int mask, domainCellType value);
+nbdNeighbor nbdGetByMask(Neighborhood *neighborhood, int mask);

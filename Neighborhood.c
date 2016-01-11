@@ -59,15 +59,31 @@ void freeNeighborhood(Neighborhood *neighborhood) {
 	neighborhood = NULL;
 }
 
-int nbdCountByValue(Neighborhood *neighborhood, int mask, domainCellType value) {
+int nbdCountByValue(Neighborhood *neighborhood, domainCellType value) {
 	int count = 0;
 	for (size_t i = 0; i < neighborhood->size; i++)
 	{
-		if ((neighborhood->neighborhood[i].mask & mask) && neighborhood->neighborhood[i].cellValue.value == value) {
+		if (neighborhood->neighborhood[i].cellValue.value == value) {
 			count++;
 		}
 	}
 	return count;
+}
+
+domainCellType nbdGetMaxValue(Neighborhood *neighborhood) {
+	if (neighborhood->size == 0) {
+		fatalError("nbd GetMax Empty nbd");
+	}
+
+	domainCellType max = neighborhood->neighborhood[0].cellValue.value;
+
+	for (size_t i = 0; i < neighborhood->size; i++)
+	{
+		if (neighborhood->neighborhood[i].cellValue.value > max) {
+			max = neighborhood->neighborhood[i].cellValue.value;
+		}
+	}
+	return max;
 }
 
 int nbdIsNeighborEquals(Neighborhood *neighborhood, int mask, domainCellType value) {
