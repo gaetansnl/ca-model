@@ -11,8 +11,9 @@ Neighborhood *createNeighborhood(Domain *domain, domainCellCoord cellCoord, int 
 	/*
 		Alloc memoire du voisinage et des voisins
 	*/
-	Neighborhood *n = malloc(sizeof(Neighborhood) + neighborsCount * sizeof(nbdNeighbor));
-	n->neighborhood = n + 1;
+	Neighborhood *n = malloc(sizeof(Neighborhood));
+	n->neighborhood = malloc(neighborsCount * sizeof(nbdNeighbor));
+
 	n->mask = mask;
 	n->size = neighborsCount;
 
@@ -27,10 +28,20 @@ Neighborhood *createNeighborhood(Domain *domain, domainCellCoord cellCoord, int 
 	{
 		for (int j = -NEIGHBORS_DIST; j <= NEIGHBORS_DIST; j++)
 		{
-			if ((i != 0 || j != 0) && (currentMask & n->mask)) {
+			/*
+				Pour eviter l'incrementation du mask, etc quand la positions relative est nulle
+			*/
+			if (i == 0 && j == 0) {
+				continue;
+			}
+
+			if (currentMask & n->mask) {
 				domainCellCoord coord = { cellCoord.x + i, cellCoord.y + j };
 				nbdNeighbor newNeighbor;
 
+				/*
+					Si le neighbor est hors du domaine on le differencie en lui appliquant un mask de 0 (aucune position relative)
+				*/
 				if (!domainIsOutside(coord, domain)) {
 					domainCellValue value = domainGetCellValue(coord, domain);
 					newNeighbor.mask = currentMask;
@@ -54,23 +65,19 @@ Neighborhood *createNeighborhood(Domain *domain, domainCellCoord cellCoord, int 
 	return n;
 }
 
+/*
+	Libere la mémoire pour le voisignage specifie
+*/
 void freeNeighborhood(Neighborhood *neighborhood) {
+	free(neighborhood->neighborhood);
 	free(neighborhood);
 	neighborhood = NULL;
 }
 
-int nbdCountByValue(Neighborhood *neighborhood, domainCellType value) {
-	int count = 0;
-	for (size_t i = 0; i < neighborhood->size; i++)
-	{
-		if (neighborhood->neighborhood[i].cellValue.value == value) {
-			count++;
-		}
-	}
-	return count;
-}
-
-domainCellType nbdGetMaxValue(Neighborhood *neighborhood) {
+/*
+	Obtient la valeur maximale parmi la valeur des voisins du voisinage specifie
+*/
+domainCellType nbdValueGetMax(Neighborhood *neighborhood) {
 	if (neighborhood->size == 0) {
 		fatalError("nbd GetMax Empty nbd");
 	}
@@ -79,13 +86,61 @@ domainCellType nbdGetMaxValue(Neighborhood *neighborhood) {
 
 	for (size_t i = 0; i < neighborhood->size; i++)
 	{
-		if (neighborhood->neighborhood[i].cellValue.value > max) {
+		if (neighborhood->neighborhood[i].mask && neighborhood->neighborhood[i].cellValue.value > max) {
 			max = neighborhood->neighborhood[i].cellValue.value;
 		}
 	}
 	return max;
 }
 
+/*
+Obtient la valeur minimale parmi la valeur des voisins du voisinage specifie
+*/
+domainCellType nbdValueGetMin(Neighborhood *neighborhood) {
+	if (neighborhood->size == 0) {
+		fatalError("nbd GetMin Empty nbd");
+	}
+
+	domainCellType min = neighborhood->neighborhood[0].cellValue.value;
+
+	for (size_t i = 0; i < neighborhood->size; i++)
+	{
+		if (neighborhood->neighborhood[i].mask && neighborhood->neighborhood[i].cellValue.value < min) {
+			min = neighborhood->neighborhood[i].cellValue.value;
+		}
+	}
+	return min;
+}
+/*
+	Obtient le nombre de voisins ayant la valeur specifiee
+*/
+int nbdValueCount(Neighborhood *neighborhood, domainCellType value) {
+	int count = 0;
+	for (size_t i = 0; i < neighborhood->size; i++)
+	{
+		if (neighborhood->neighborhood[i].mask && neighborhood->neighborhood[i].cellValue.value == value) {
+			count++;
+		}
+	}
+	return count;
+}
+
+/*
+	Obtient si oui ou non tous les voisins sont definis
+*/
+int nbdIsComplete(Neighborhood* neightborhood) {
+	for (size_t i = 0; i < neightborhood->size; i++)
+	{
+		if (neightborhood->neighborhood[i].mask == 0) {
+			return 0;
+		}
+	}
+	return 1;
+}
+
+/*
+	Obtient si oui ou non le voisin spécifié à sa valeur egale a value
+*/
 int nbdIsNeighborEquals(Neighborhood *neighborhood, int mask, domainCellType value) {
 	for (size_t i = 0; i < neighborhood->size; i++)
 	{
@@ -96,6 +151,9 @@ int nbdIsNeighborEquals(Neighborhood *neighborhood, int mask, domainCellType val
 	return 1;
 }
 
+/*
+	Obtient le voisin avec le mask specifie
+*/
 nbdNeighbor nbdGetByMask(Neighborhood *neighborhood, int mask) {
 	for (size_t i = 0; i < neighborhood->size; i++)
 	{
@@ -103,5 +161,6 @@ nbdNeighbor nbdGetByMask(Neighborhood *neighborhood, int mask) {
 			return neighborhood->neighborhood[i];
 		}
 	}
-	fatalError("Neighbor not found by mask");
+	nbdNeighbor n = {0};
+	return n;
 }
