@@ -4,27 +4,20 @@
 #include "Domain.h"
 #include "Error.h"
 
-/*Helper Function
-	Obtient la taille du tableau representant le domaine
-*/
-
-size_t domainArraySize(int width, int height) {
-	return width * sizeof(domainCellType*) + width * height * sizeof(domainCellType);
-}
-
 /*
 	Obtient un nouveau domaine
 */
 Domain *domainCreate(int width, int height) {
-	Domain *r = calloc(1, sizeof(Domain) + domainArraySize(width, height));
+	Domain *r = calloc(1, sizeof(Domain));
 	r->width = width;
 	r->height = height;
 
-	r->array = r + 1;
+	r->array = calloc(width, sizeof(domainCellType*));
+	r->array[0] = calloc(width * height, sizeof(domainCellType));
 
-	for (size_t i = 0; i < r->width; i++)
+	for (size_t i = 1; i < r->width; i++)
 	{
-		r->array[i] = r->array + r->width + i * r->height;
+		r->array[i] = r->array[0] + i * r->height;
 	}
 
 	return r;
@@ -51,6 +44,8 @@ Domain *domainCopy(Domain *domain) {
 	Domain dispose
 */
 void domainFree(Domain *domain) {
+	free(domain->array[0]);
+	free(domain->array);
 	free(domain);
 }
 
@@ -89,7 +84,7 @@ domainCellValue domainGetCellValue(domainCellCoord p, Domain *domain) {
 	Obtient si la la cellule aux coordonnees specifiees est dans le domaine specifie
 */
 int domainIsOutside(domainCellCoord coord, Domain *domain) {
-	return coord.x > domain->width || coord.x < 0 || coord.y > domain->height || coord.y < 0;
+	return coord.x >= domain->width || coord.x < 0 || coord.y >= domain->height || coord.y < 0;
 }
 
 int domainCompare(Domain *domain, Domain *source) {
