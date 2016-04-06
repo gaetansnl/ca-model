@@ -37,12 +37,16 @@ typedef struct Neighborhood {
 	int mask;
 } Neighborhood;
 
-Neighborhood *createNeighborhood(Domain *domain, domainCellCoord domainCellCoord, int mask);
+Neighborhood *createNeighborhood(int mask);
+Neighborhood *createNeighborhoodAndInit(Domain *domain, domainCellCoord domainCellCoord, int mask);
+Neighborhood *updateNeighborhood(Domain *domain, domainCellCoord domainCellCoord, Neighborhood *n);
 void freeNeighborhood(Neighborhood * neighborhood);
 
-int nbdCountByValue(Neighborhood *neighborhood, domainCellType value);
+int nbdValueCount(Neighborhood *neighborhood, domainCellType value);
+int nbdUndefinedCount(Neighborhood *neighborhood);
 domainCellType nbdValueGetMax(Neighborhood *neighborhood);
 int nbdIsNeighborEquals(Neighborhood *neighborhood, int mask, domainCellType value);
 nbdNeighbor nbdGetByMask(Neighborhood *neighborhood, int mask);
 domainCellType nbdValueGetMin(Neighborhood *neighborhood);
 int nbdIsComplete(Neighborhood* neightborhood);
+int nbdGetMaskByValue(Neighborhood *neighborhood, domainCellType value);
