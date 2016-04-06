@@ -21,6 +21,7 @@ void printChar(int c) {
 	case 197:printf("\u253c");break;
 	case 217:printf("\u2518");break;
 	case 218:printf("\u250c");break;
+
 	default:break;
 	}
 }
