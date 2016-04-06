@@ -5,7 +5,7 @@
 #include "Error.h"
 
 /*
-	Obtient un nouveau domaine
+	Alloue un nouveau domaine avec la taille spécifiée
 */
 Domain *domainCreate(int width, int height) {
 	Domain *r = calloc(1, sizeof(Domain));
@@ -24,7 +24,7 @@ Domain *domainCreate(int width, int height) {
 }
 
 /*
-	Obtient une copie du domaine precise
+	Obtient une copie du domaine spéficifié
 */
 Domain *domainCopy(Domain *domain) {
 	Domain *r = domainCreate(domain->width, domain->height);
@@ -66,7 +66,9 @@ domainCell domainGetCell(domainCellCoord p, Domain *domain){
 }
 
 /*
-	Obtient la valeur de la cellule aux coordonnees specifiees
+	Obtient domainCellValue aux coordonnees specifiees.
+
+	domainCellValue représente une valeur et ses coordonnées
 */
 domainCellValue domainGetCellValue(domainCellCoord p, Domain *domain) {
 	if (domainIsOutside(p, domain)) {
@@ -81,12 +83,15 @@ domainCellValue domainGetCellValue(domainCellCoord p, Domain *domain) {
 }
 
 /*
-	Obtient si la la cellule aux coordonnees specifiees est dans le domaine specifie
+	Obtient si la cellule aux coordonnees specifiees est dans le domaine specifie
 */
 int domainIsOutside(domainCellCoord coord, Domain *domain) {
 	return coord.x >= domain->width || coord.x < 0 || coord.y >= domain->height || coord.y < 0;
 }
 
+/*
+	Obtient si les domaines specifiés leurs valeurs égales
+*/
 int domainCompare(Domain *domain, Domain *source) {
 	if ((domain->width != source->width) || (domain->height != source->height)) {
 		fatalError("domainCompare size not equal");
