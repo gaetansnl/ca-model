@@ -1,8 +1,34 @@
 #include <stdlib.h>
 #include "Transition.h"
 
-//	Transition Execution
-//
+/*
+	Execution des transitions sur un domaine spécifié avec les paramètres :
+
+	- config La configuration pour l'execution. Elle contient notamment le mask
+	- transitionFunction Fonction de transition
+	- controlFunction Fonction de controle de transition OPTIONAL 
+	- epochWatch Fonction pour suivre les transitions pendant une epoch OPTIONAL
+
+	Retourne struct TransitionsExecResult contenant les statistiques sur l'execution.
+
+
+	Cette fonction crée le neighborhood pour chaque cellule du domaine 
+	avant de lui appliquer la fonction de transition. La valeur retournée par
+	la fonction de transition sera la nouvelle valeur de la cellule.
+
+	L'execution est effectuée de telle manière que la focntion de transition 
+	peut utiliser uniquement sa valeur et la valeur des voisins.
+
+	Il est possible de controler l'execution des transition à l'aide 
+	de controlFunction. Cette fonction est appelée à chaque fin d'epoch.
+	On peut modifier le TransitionsExecControl en paramètre pour stopper 
+	l'execution ou afficher des informations sur lepoch en cours
+
+	Il est possible de suivre très précisement chaque transition de l'epoch 
+	en cours avec epochWatch. La fonction spécifiée sera appelée après chaque 
+	transition.
+
+*/
 TransitionsExecResult te_run(
 	Domain *domain, 
 	TransitionsConfig config,
@@ -15,9 +41,12 @@ TransitionsExecResult te_run(
 	int watchEpoch = epochWatch != NULL;
 
 	/*
-		Compteur des epoch
+		Compteurs statistiques
 	*/
-	int epoch = 1;
+	unsigned long epoch = 1;
+	unsigned long totalChange = 0;
+
+	Neighborhood *nbd = NULL;
 
 	while (control.state == RUNNING) {
 
@@ -28,6 +57,9 @@ TransitionsExecResult te_run(
 			Les valeurs ne seront pas celles en cours de modification
 		*/
 		Domain *nbdDomain = domainCopy(domain);
+		if(nbd == NULL) nbd = createNeighborhood(config.mask);
+
+		int change = 0;
 
 		/*
 			Execution sur toute la grille
@@ -43,9 +75,14 @@ TransitionsExecResult te_run(
 				domainCellCoord coord = {x, y};
 				domainCellValue c = domainGetCellValue(coord, domain);
 
-				Neighborhood *nbd = createNeighborhood(nbdDomain, coord, config.mask);
-				domain->array[c.cellCoord.x][c.cellCoord.y] = (*transitionFunction)(c, nbd);
-				freeNeighborhood(nbd);
+				updateNeighborhood(nbdDomain, coord, nbd);
+
+				domainCellType v = (*transitionFunction)(c, nbd);
+				if (domain->array[c.cellCoord.x][c.cellCoord.y] != v) {
+					change++;
+				}
+
+				domain->array[c.cellCoord.x][c.cellCoord.y] = v;
 
 				/*
 					On transmet la progressionde l'epoch au callback si elle est suivie
@@ -58,21 +95,27 @@ TransitionsExecResult te_run(
 			}
 		}
 
-		if (domainCompare(domain, nbdDomain)) {
+		totalChange = totalChange + change;
+		domainFree(nbdDomain);
+
+		if (!change) {
 			control.state = FINISHED;
-		}
-		else {
-			if (controlFunction != NULL) {
-				(*controlFunction)(domain, &control);
-			}
-			epoch++;
+			continue;
 		}
 
-		domainFree(nbdDomain);
+		if(controlFunction != NULL) {
+			(*controlFunction)(domain, &control);
+		}
+
+		epoch++;
 	}
+
+	freeNeighborhood(nbd);
 
 	TransitionsExecResult result;
 	result.state = control.state;
+	result.timeStep = control.timeStep;
+	result.change = totalChange;
 
 	return result;
 }

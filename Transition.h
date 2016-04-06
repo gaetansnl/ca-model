@@ -29,12 +29,18 @@ typedef struct {
 
 typedef struct {
 	TransitionsExecState state;
+	int timeStep;
+	int change;
 } TransitionsExecResult;
+
+typedef int(*TransitionsFunction)(domainCellValue, Neighborhood*);
+typedef void(*TransitionsControlFunction)(Domain*, TransitionsExecControl*);
+typedef void(*TransitionsEpochWatch)(Domain*, TransitionsEpochProgression);
 
 TransitionsExecResult te_run(
 	Domain *domain,
 	TransitionsConfig config,
-	int(*transitionFunction)(domainCellValue, Neighborhood*),
-	void(*controlFunction)(Domain*, TransitionsExecControl*),
-	void(*epochWatch)(Domain*, TransitionsEpochProgression)
+	TransitionsFunction transitionFunction,
+	TransitionsControlFunction controlFunction,
+	TransitionsEpochWatch epochWatch
 );
