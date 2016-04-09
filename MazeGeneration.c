@@ -117,19 +117,3 @@ int mazePositionToDirBasic(int position) {
 		break;
 	}
 }
-
-int mazeReverseDirBasic(int dir) {
-	switch (dir)
-	{
-	case maze_LEFT:
-		return maze_RIGHT;
-	case nbd_RIGHT:
-		return maze_LEFT;
-	case maze_TOP:
-		return maze_BOTTOM;
-	case nbd_BOTTOM:
-		return maze_TOP;
-	default:
-		break;
-	}
-}

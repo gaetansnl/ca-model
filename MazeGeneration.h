@@ -12,4 +12,3 @@ typedef enum mazeDirection {
 Domain* mazeSetPoints(Domain *domain, domainCellCoord entrance, domainCellCoord exit, int vEntr, int vExit);
 
 int mazePositionToDirBasic(int position);
-int mazeReverseDirBasic(int dir);
