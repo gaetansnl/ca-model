@@ -9,11 +9,16 @@
 */
 Domain *domainCreate(int width, int height) {
 	Domain *r = calloc(1, sizeof(Domain));
+	if (!r) fatalError("Unable to alloc");
+
 	r->width = width;
 	r->height = height;
 
 	r->array = calloc(width, sizeof(domainCellType*));
+	if (!r->array) fatalError("Unable to alloc");
+
 	r->array[0] = calloc(width * height, sizeof(domainCellType));
+	if (!r->array[0]) fatalError("Unable to alloc");
 
 	for (size_t i = 1; i < r->width; i++)
 	{
