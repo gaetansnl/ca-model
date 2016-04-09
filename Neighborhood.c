@@ -22,7 +22,10 @@ Neighborhood *createNeighborhood(int mask) {
 	*/
 
 	Neighborhood *n = malloc(sizeof(Neighborhood));
+	if (!n) fatalError("Unable to alloc neighborhood");
+
 	n->neighborhood = malloc(neighborsCount * sizeof(nbdNeighbor));
+	if (!n->neighborhood) fatalError("Unable to alloc neighborhood neighbors");
 
 	n->mask = mask;
 	n->size = neighborsCount;
@@ -183,7 +186,7 @@ int nbdIsComplete(Neighborhood* neightborhood) {
 }
 
 /*
-	Obtient si oui ou non le voisin spécifié à sa valeur egale a value
+	Obtient si oui ou non le voisin à la positions spécifiée par mask à sa valeur egale a value
 */
 int nbdIsNeighborEquals(Neighborhood *neighborhood, int mask, domainCellType value) {
 	for (size_t i = 0; i < neighborhood->size; i++)
@@ -218,13 +221,10 @@ nbdNeighbor nbdGetByMask(Neighborhood *neighborhood, int mask) {
 int nbdGetMaskByValue(Neighborhood *neighborhood, domainCellType value) {
 	for (size_t i = 0; i < neighborhood->size; i++)
 	{
-		if (neighborhood->neighborhood[i].cellValue.value == value) {
+		if (neighborhood->neighborhood[i].cellValue.value == value && neighborhood->neighborhood[i].mask) {
 			return neighborhood->neighborhood[i].mask;
 		}
 	}
 
 	return 0;
 }
-
-
-//TODO: funtion return mask where a value is

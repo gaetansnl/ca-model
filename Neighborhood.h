@@ -25,6 +25,7 @@ typedef enum neighborhoodPosition {
 } neighborhoodPosition;
 
 #define nbd_VON_NEUMANN 0b01011010
+#define nbd_MOORE 0b11111111
 
 typedef struct nbdNeighbor {
 	int mask;
