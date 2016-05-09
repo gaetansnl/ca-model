@@ -14,8 +14,8 @@ typedef struct {
 	Structure representant les coordonnees d'une cellule
 */
 typedef struct {
-	int x;
-	int y;
+	unsigned int x;
+	unsigned int y;
 } domainCellCoord;
 
 /*
