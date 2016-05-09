@@ -8,8 +8,11 @@ int NEIGHBORS_DIST = 1;
 	Le mask est utilisé afin de déterminer le nombre de voisins
 	à l'aide de son hamming weight. Cela permet d'allouer 
 	l'espace necessaire pour stocker tous les voisins du mask.
+
+	L'initialisation du neighborhood est séparée de l'allocation 
+	pour des raisons de performance
 */
-Neighborhood *createNeighborhood(int mask) {
+Neighborhood *createNeighborhood(int32_t mask) {
 
 	/*
 		Hamming weight
@@ -37,7 +40,7 @@ Neighborhood *createNeighborhood(int mask) {
 	Allocation d'un neighborhood et initialisation à partir de la domainCellCoord spécifiée
 	et ce pour le masque spécifié
 */
-Neighborhood *createNeighborhoodAndInit(Domain *domain, domainCellCoord cellCoord, int mask) {
+Neighborhood *createNeighborhoodAndInit(Domain *domain, domainCellCoord cellCoord, int32_t mask) {
 	Neighborhood *n = createNeighborhood(mask);
 	updateNeighborhood(domain, cellCoord, n);
 
@@ -46,10 +49,14 @@ Neighborhood *createNeighborhoodAndInit(Domain *domain, domainCellCoord cellCoor
 
 /*
 	Update d'un neighborhood déjà alloué pour une nouvelle domainCellCoord
+
+	Les voisins hors domaine obtiennent un mask de zero. L'operation AND sur 
+	les masques du voisinnage et d'un voisin ne sera donc pas trouvé lors 
+	d'une recherche.
 */
 Neighborhood *updateNeighborhood(Domain *domain, domainCellCoord cellCoord, Neighborhood *n) {
 
-	int currentMask = 0b1;
+	int32_t currentMask = 0b1;
 	int index = 0;
 
 	/*
@@ -188,7 +195,7 @@ int nbdIsComplete(Neighborhood* neightborhood) {
 /*
 	Obtient si oui ou non le voisin à la positions spécifiée par mask à sa valeur egale a value
 */
-int nbdIsNeighborEquals(Neighborhood *neighborhood, int mask, domainCellType value) {
+int nbdIsNeighborEquals(Neighborhood *neighborhood, int32_t mask, domainCellType value) {
 	for (size_t i = 0; i < neighborhood->size; i++)
 	{
 		if ((neighborhood->neighborhood[i].mask & mask) && neighborhood->neighborhood[i].cellValue.value != value) {
@@ -201,7 +208,7 @@ int nbdIsNeighborEquals(Neighborhood *neighborhood, int mask, domainCellType val
 /*
 	Obtient le voisin avec le mask specifie
 */
-nbdNeighbor nbdGetByMask(Neighborhood *neighborhood, int mask) {
+nbdNeighbor nbdGetByMask(Neighborhood *neighborhood, int32_t mask) {
 	for (size_t i = 0; i < neighborhood->size; i++)
 	{
 		if (neighborhood->neighborhood[i].mask & mask) {
@@ -227,4 +234,23 @@ int nbdGetMaskByValue(Neighborhood *neighborhood, domainCellType value) {
 	}
 
 	return 0;
+}
+
+/*
+Retourne le mask de la premiere cell ayant la valeur specifiée
+*/
+int nbdGetMaskByValues(Neighborhood *neighborhood, domainCellType* values, int size, int first) {
+	int result = 0;
+	for (size_t i = 0; i < neighborhood->size; i++)
+	{
+		for (size_t j = 0; j < size; j++)
+		{
+			if (neighborhood->neighborhood[i].cellValue.value == values[j] && neighborhood->neighborhood[i].mask) {
+				result = result | neighborhood->neighborhood[i].mask;
+				if (first) return result;
+			}
+		}
+	}
+
+	return result;
 }
