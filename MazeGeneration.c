@@ -8,6 +8,10 @@
 
 /*
 	Fonction de transition pour normaliser l'état du domaine
+
+	Normaliser l'état du domaine correspond à l'operation permetant de maintenir
+	les zones réliées coherentes. Cette operation est appliqué après la suppresion 
+	d'un mur où une zone doit etre en general etendue.
 */
 TransitionsFunction normalizeTransition(domainCellValue cell, Neighborhood *neighborhood) {
 	domainCellType max = nbdValueGetMax(neighborhood);
@@ -26,7 +30,7 @@ int getValue(Neighborhood* nbd) {
 }
 
 /*
-	Crée un labyrinthe ayant els dimensions spécifiées
+	Crée un labyrinthe ayant les dimensions spécifiées
 */
 Domain* mazeCreate(int width, int height) {
 	srand(clock());
@@ -57,6 +61,7 @@ Domain* mazeCreate(int width, int height) {
 			La cellule courante est un mur
 		*/
 		if (domainGetCellValue(cellCoord, d).value == 1) {
+
 			Neighborhood *nbd1 = createNeighborhoodAndInit(d, cellCoord, nbd_TOP | nbd_BOTTOM);
 			Neighborhood *nbd2 = createNeighborhoodAndInit(d, cellCoord, nbd_LEFT | nbd_RIGHT);
 
