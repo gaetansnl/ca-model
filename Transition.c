@@ -50,8 +50,6 @@ TransitionsExecResult te_run(
 
 	while (control.state == RUNNING) {
 
-		control.timeStep = epoch;
-
 		/*
 			Copie du domaine pour les neighbors
 			Les valeurs ne seront pas celles en cours de modification
@@ -102,6 +100,8 @@ TransitionsExecResult te_run(
 			control.state = FINISHED;
 			continue;
 		}
+
+		control.timeStep = epoch;
 
 		if(controlFunction != NULL) {
 			(*controlFunction)(domain, &control);

@@ -6,6 +6,7 @@
 
 typedef enum{
 	FINISHED = 0,
+	CONTROL_FINISHED = 4,
 	RUNNING = 1,
 	ABORTED = 2,
 	ERROR = 3
