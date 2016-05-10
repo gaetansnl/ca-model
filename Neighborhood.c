@@ -121,7 +121,7 @@ domainCellType nbdValueGetMax(Neighborhood *neighborhood) {
 		fatalError("nbd GetMax Empty nbd");
 	}
 
-	domainCellType max;
+	domainCellType max = 0;
 	size_t i;
 
 	for (i = 0; i < neighborhood->size; i++)
@@ -152,7 +152,7 @@ domainCellType nbdValueGetMin(Neighborhood *neighborhood) {
 		fatalError("nbd GetMin Empty nbd");
 	}
 
-	domainCellType min;
+	domainCellType min = 0;
 	size_t i;
 
 	for (i = 0; i < neighborhood->size; i++)
@@ -162,6 +162,8 @@ domainCellType nbdValueGetMin(Neighborhood *neighborhood) {
 			break;
 		}
 	}
+
+	if (i == neighborhood->size) fatalError("Error getMax no neighbors available");
 
 	for (; i < neighborhood->size; i++)
 	{
