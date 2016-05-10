@@ -25,7 +25,7 @@ void clearConsole() {
 #endif
 
 int current = 1;
-TransitionsFunction transition(domainCellValue cell, Neighborhood *nbd) {
+int transition(domainCellValue cell, Neighborhood *nbd) {
 	return current;
 }
 
@@ -44,13 +44,16 @@ Obtient ou definit si le debug est interrompu jusqu'a la fin de l'epoch
 */
 int skipEpochStep = 0;
 
-charTransformer charTransform(int c) {
+/*
+	Char transform apr defaut pour remplacer les nombres du tableau par des caractères
+*/
+char charTransform(int c) {
 	switch (c)
 	{
 	case 0:
 		return ' ';
 	case 1:
-		return 219;
+		return '*';
 	case 2:
 		return 'L';
 	case 3:
@@ -60,7 +63,7 @@ charTransformer charTransform(int c) {
 	case 5:
 		return 'B';
 	default:
-		return c + 48;
+		return (char)(c + 48);
 		break;
 	}
 }
@@ -68,7 +71,7 @@ charTransformer charTransform(int c) {
 /*
 	Controle du debug entre les transitions
 */
-TransitionsControlFunction control(Domain *domain, TransitionsExecControl *control) {
+void control(Domain *domain, TransitionsExecControl *control) {
 	skipEpochStep = 0;
 	if (!timeStepStep) {
 		return;
@@ -98,7 +101,10 @@ TransitionsControlFunction control(Domain *domain, TransitionsExecControl *contr
 	}
 }
 
-TransitionsControlFunction mazeCtrl(Domain *domain, TransitionsExecControl *transitionControl) {
+/*
+	Control avec arret des transitions lorsqu'un chemin arrive à proximité du point d'entrée
+*/
+void mazeCtrl(Domain *domain, TransitionsExecControl *transitionControl) {
 	domainCellCoord c = { 0,0 };
 	domainCellType dir[4] = {maze_BOTTOM, maze_LEFT, maze_RIGHT, maze_TOP};
 	Neighborhood* nbd = createNeighborhoodAndInit(domain, c, nbd_VON_NEUMANN);
@@ -115,7 +121,7 @@ TransitionsControlFunction mazeCtrl(Domain *domain, TransitionsExecControl *tran
 /*
 	Controle du debug pendant l'epoch
 */
-TransitionsEpochWatch epoch(Domain *domain, TransitionsEpochProgression epochProgression) {
+void epoch(Domain *domain, TransitionsEpochProgression epochProgression) {
 	if (!epochStep || skipEpochStep) {
 		return;
 	}
@@ -129,6 +135,9 @@ TransitionsEpochWatch epoch(Domain *domain, TransitionsEpochProgression epochPro
 	skipEpochStep = getOneChar() == 'n';
 }
 
+/*
+	Affichage des résultats de l'execution
+*/
 void result(TransitionsExecResult result) {
 	printf("Resultat de l'execution \n");
 	printf("State : %d \n", result.state);
@@ -152,18 +161,19 @@ void start() {
 /*
 	Résolution avec la solution B
 */
-TransitionsFunction mazeSolveAll(domainCellValue cell, Neighborhood *neighborhood) {
+domainCellType mazeSolveAll(domainCellValue cell, Neighborhood *neighborhood) {
 	invariant(nbd_VON_NEUMANN, neighborhood->mask, "Invalid mask");
+	if (cell.value) return cell.value;
 
 	int emptyCount = nbdValueCount(neighborhood, 0);
-	int close = nbdValueCount(neighborhood, 8);
+	int close = nbdGetMaskByValue(neighborhood, 8);
 
-	if (cell.value == 0 && emptyCount == 0 && close) {
-		return mazePositionToDirBasic(nbdGetMaskByValue(neighborhood, 8));
+	if (emptyCount == 1 && !close) {
+		return mazePositionToDirBasic(nbdGetMaskByValue(neighborhood, 0));
 	}
 
-	if (cell.value == 0 && emptyCount == 1 && !close) {
-		return mazePositionToDirBasic(nbdGetMaskByValue(neighborhood, 0));
+	if (emptyCount == 0 && close) {
+		return mazePositionToDirBasic(close);
 	}
 
 	return cell.value;
@@ -172,36 +182,39 @@ TransitionsFunction mazeSolveAll(domainCellValue cell, Neighborhood *neighborhoo
 /*
 Résolution avec la solution la solution A
 */
-TransitionsFunction mazeSolveSimple(domainCellValue cell, Neighborhood *neighborhood) {
+domainCellType mazeSolveSimple(domainCellValue cell, Neighborhood *neighborhood) {
 	invariant(nbd_VON_NEUMANN, neighborhood->mask, "Invalid mask");
+	if (cell.value) return cell.value;
 
 	int wallCount = nbdValueCount(neighborhood, 1) + nbdUndefinedCount(neighborhood);
 
-	if (cell.value == 0 && wallCount == 3) {
+	if (wallCount == 3) {
 		return 1;
 	}
 
 	return cell.value;
 }
 
+//Définition des cellules de direction avec la cellule de sortie
+domainCellType dirCells[5] = { maze_BOTTOM, maze_LEFT, maze_RIGHT, maze_TOP, 8 };
+
 
 //Necessite une entrée définie
 /*
 	Résolution avec la solution générale et la solution A
 */
-TransitionsFunction mazeSolveAndSimple(domainCellValue cell, Neighborhood *neighborhood) {
+domainCellType mazeSolveAndSimple(domainCellValue cell, Neighborhood *neighborhood) {
 	invariant(nbd_VON_NEUMANN, neighborhood->mask, "Invalid mask");
-
-	domainCellType dirCells[5] = {maze_BOTTOM, maze_LEFT, maze_RIGHT, maze_TOP, 8};
+	if (cell.value) return cell.value;
 
 	int wallCount = nbdValueCount(neighborhood, 1) + nbdUndefinedCount(neighborhood);
 
-	if (cell.value == 0 && wallCount == 3) {
+	if (wallCount == 3) {
 		return 1;
 	}
 
-	int dirCount = nbdGetMaskByValues(neighborhood, &dirCells, 5, 1);
-	if (cell.value == 0 && dirCount) {
+	int dirCount = nbdGetMaskByValues(neighborhood, (int*)&dirCells, 5, 1);
+	if (dirCount) {
 		return mazePositionToDirBasic(dirCount);
 	}
 
@@ -211,13 +224,12 @@ TransitionsFunction mazeSolveAndSimple(domainCellValue cell, Neighborhood *neigh
 /*
 	Résolution du labyrinthe avec la méthode générale
 */
-TransitionsFunction mazeSolve(domainCellValue cell, Neighborhood *neighborhood) {
+domainCellType mazeSolve(domainCellValue cell, Neighborhood *neighborhood) {
 	invariant(nbd_VON_NEUMANN, neighborhood->mask, "Invalid mask");
+	if (cell.value) return cell.value;
 
-	domainCellType dirCells[5] = { maze_BOTTOM, maze_LEFT, maze_RIGHT, maze_TOP, 8 };
-
-	int dirCount = nbdGetMaskByValues(neighborhood, &dirCells, 5, 1);
-	if (cell.value == 0 && dirCount) {
+	int dirCount = nbdGetMaskByValues(neighborhood, (int*)&dirCells, 5, 1);
+	if (dirCount) {
 		return mazePositionToDirBasic(dirCount);
 	}
 
@@ -230,7 +242,7 @@ TransitionsFunction mazeSolve(domainCellValue cell, Neighborhood *neighborhood) 
 	Gardent la valeur 1 si 1,2,3,4,5 voisins
 	Prennent la valeur 0 sinon
 */
-TransitionsFunction b3s12345(domainCellValue cell, Neighborhood *neighborhood) {
+domainCellType b3s12345(domainCellValue cell, Neighborhood *neighborhood) {
 	invariant(nbd_MOORE, neighborhood->mask, "Invalid mask");
 
 	int count = nbdValueCount(neighborhood, 1);
@@ -246,6 +258,9 @@ TransitionsFunction b3s12345(domainCellValue cell, Neighborhood *neighborhood) {
 	return 0;
 }
 
+/*
+	Obtient un labyrinthe non parfait et "fat maze"
+*/
 Domain* getSpecialMaze(){
 	Domain *a = domainCreate(11, 11);
 
@@ -283,6 +298,9 @@ int main() {
 
 	while (1)
 	{
+		/*
+			Domaine pour chaque test
+		*/
 		Domain *DomainB = mazeCreate(11, 11);
 		Domain *DomainSolve = domainCopy(DomainB);
 		Domain *DomainSolve2 = domainCopy(DomainB);
@@ -290,6 +308,9 @@ int main() {
 		Domain *DomainA = domainCopy(DomainB);
 		Domain *DomainSolveAndSimple = domainCopy(DomainB);
 
+		/*
+			Ajout des points de sortie et d'entrée quand cela est necessaire
+		*/
 		domainCellCoord entrance = { 0, 0 };
 		domainCellCoord exit = { 10, 10 };
 
@@ -302,23 +323,34 @@ int main() {
 
 		clearConsole();
 
+		/*
+			Execution des transitions
+		*/
+
 		TransitionsExecResult results;
+
+		printf("Solution A\n");
 		results = te_run(DomainA, config, mazeSolveSimple, control, epoch);
 		table_print_with_params(DomainA->array, table_print_char_line, DomainA->height, DomainA->width, 1, 1, charTransform);
 		result(results);
 
+		printf("Solution B\n");
 		results = te_run(DomainB, config, mazeSolveAll, control, epoch);
 		table_print_with_params(DomainB->array, table_print_char_line, DomainB->height, DomainB->width, 1, 1, charTransform);
 		result(results);
 
+		printf("Solution Generale\n");
 		results = te_run(DomainSolve, config, mazeSolve, control, epoch);
 		table_print_with_params(DomainSolve->array, table_print_char_line, DomainSolve->height, DomainSolve->width, 1, 1, charTransform);
 		result(results);
 
+		printf("Solution generale short circuit\n");
+		//Notons qu'on change le control
 		results = te_run(DomainSolve2, config, mazeSolve, mazeCtrl, epoch);
 		table_print_with_params(DomainSolve2->array, table_print_char_line, DomainSolve2->height, DomainSolve2->width, 1, 1, charTransform);
 		result(results);
 
+		printf("Solution generale parcours dans les deux sens du DAG\n");
 		results = te_run(DomainSolveAndSimple, config, mazeSolveAndSimple, control, epoch);
 		table_print_with_params(DomainSolveAndSimple->array, table_print_char_line, DomainSolveAndSimple->height, DomainSolveAndSimple->width, 1, 1, charTransform);
 		result(results);
@@ -331,7 +363,4 @@ int main() {
 
 		getchar();	
 	}
-
-	//TransitionsConfig config = {1};
-	//te_run(a, config, transition, control, epoch);
 }

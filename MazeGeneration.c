@@ -13,7 +13,7 @@
 	les zones réliées coherentes. Cette operation est appliqué après la suppresion 
 	d'un mur où une zone doit etre en general etendue.
 */
-TransitionsFunction normalizeTransition(domainCellValue cell, Neighborhood *neighborhood) {
+domainCellType normalizeTransition(domainCellValue cell, Neighborhood *neighborhood) {
 	domainCellType max = nbdValueGetMax(neighborhood);
 	return cell.value != 1 && max > 1 && max > cell.value ? max : cell.value;
 }
