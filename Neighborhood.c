@@ -203,10 +203,10 @@ int nbdUndefinedCount(Neighborhood *neighborhood) {
 /*
 	Obtient si oui ou non tous les voisins sont definis
 */
-int nbdIsComplete(Neighborhood* neightborhood) {
-	for (size_t i = 0; i < neightborhood->size; i++)
+int nbdIsComplete(Neighborhood* neighborhood) {
+	for (size_t i = 0; i < neighborhood->size; i++)
 	{
-		if (neightborhood->neighborhood[i].mask == 0) {
+		if (neighborhood->neighborhood[i].mask == 0) {
 			return 0;
 		}
 	}

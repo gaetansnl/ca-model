@@ -50,6 +50,6 @@ domainCellType nbdValueGetMax(Neighborhood *neighborhood);
 int nbdIsNeighborEquals(Neighborhood *neighborhood, int32_t mask, domainCellType value);
 nbdNeighbor nbdGetByMask(Neighborhood *neighborhood, int32_t mask);
 domainCellType nbdValueGetMin(Neighborhood *neighborhood);
-int nbdIsComplete(Neighborhood* neightborhood);
+int nbdIsComplete(Neighborhood* neighborhood);
 int nbdGetMaskByValue(Neighborhood *neighborhood, domainCellType value);
 int nbdGetMaskByValues(Neighborhood *neighborhood, domainCellType* values, int size, int first);
