@@ -121,14 +121,26 @@ domainCellType nbdValueGetMax(Neighborhood *neighborhood) {
 		fatalError("nbd GetMax Empty nbd");
 	}
 
-	domainCellType max = neighborhood->neighborhood[0].cellValue.value;
+	domainCellType max;
+	size_t i;
 
-	for (size_t i = 1; i < neighborhood->size; i++)
+	for (i = 0; i < neighborhood->size; i++)
+	{
+		if (neighborhood->neighborhood[i].mask) {
+			max = neighborhood->neighborhood[i].cellValue.value;
+			break;
+		}
+	}
+
+	if (i == neighborhood->size) fatalError("Error getMax no neighbors available");
+
+	for (; i < neighborhood->size; i++)
 	{
 		if (neighborhood->neighborhood[i].mask && neighborhood->neighborhood[i].cellValue.value > max) {
 			max = neighborhood->neighborhood[i].cellValue.value;
 		}
 	}
+
 	return max;
 }
 
@@ -140,9 +152,18 @@ domainCellType nbdValueGetMin(Neighborhood *neighborhood) {
 		fatalError("nbd GetMin Empty nbd");
 	}
 
-	domainCellType min = neighborhood->neighborhood[0].cellValue.value;
+	domainCellType min;
+	size_t i;
 
-	for (size_t i = 1; i < neighborhood->size; i++)
+	for (i = 0; i < neighborhood->size; i++)
+	{
+		if (neighborhood->neighborhood[i].mask) {
+			min = neighborhood->neighborhood[i].cellValue.value;
+			break;
+		}
+	}
+
+	for (; i < neighborhood->size; i++)
 	{
 		if (neighborhood->neighborhood[i].mask && neighborhood->neighborhood[i].cellValue.value < min) {
 			min = neighborhood->neighborhood[i].cellValue.value;
