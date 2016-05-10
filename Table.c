@@ -28,7 +28,7 @@ void printChar(int c) {
 #endif
 
 void table_print_horizontal(int cell_size) {
-	for (size_t j = 0; j < cell_size; j++)
+	for (int j = 0; j < cell_size; j++)
 	{
 		printChar(196);
 	}
@@ -36,7 +36,7 @@ void table_print_horizontal(int cell_size) {
 
 void table_print_top(int size, int cell_size) {
 	printChar(218);
-	for (size_t i = 0; i < size; i++)
+	for (int i = 0; i < size; i++)
 	{
 		table_print_horizontal(cell_size);
 		printChar(i != size - 1 ? 194 : 191);
@@ -46,7 +46,7 @@ void table_print_top(int size, int cell_size) {
 
 void table_print_bottom(int size, int cell_size) {
 	printChar(192);
-	for (size_t i = 0; i < size; i++)
+	for (int i = 0; i < size; i++)
 	{
 		table_print_horizontal(cell_size);
 		printChar(i != size - 1 ? 193 : 217);
@@ -56,7 +56,7 @@ void table_print_bottom(int size, int cell_size) {
 
 void table_print_separator(int size, int cell_size) {
 	printChar( 195);
-	for (size_t i = 0; i < size; i++)
+	for (int i = 0; i < size; i++)
 	{
 		table_print_horizontal(cell_size);
 		printChar(i != size - 1 ? 197 : 180);
@@ -70,7 +70,7 @@ void table_print_separator(int size, int cell_size) {
 
 void table_print_int_line(int **table, int size, int row, int cell_size) {
 	printChar(179);
-	for (size_t i = 0; i < size; i++)
+	for (int i = 0; i < size; i++)
 	{
 		printf("%*d", cell_size, table[i][row]);
 		printChar(179);
@@ -81,7 +81,7 @@ void table_print_char_line(int **table, int size, int row, int cell_size, int pa
 	charTransformer function = va_arg(list, charTransformer);
 
 	printChar(179);
-	for (size_t i = 0; i < size; i++)
+	for (int i = 0; i < size; i++)
 	{
 		printf("%*c", cell_size, (*function)(table[i][row]));
 		printChar(179);
@@ -95,7 +95,7 @@ void table_print_char_line(int **table, int size, int row, int cell_size, int pa
 
 void table_print(int **table, void(*printFunction)(), int height, int width, int cell_size) {
 	table_print_top(width, cell_size);
-	for (size_t i = 0; i < height; i++)
+	for (int i = 0; i < height; i++)
 	{
 		(*printFunction)(table, width, i, cell_size);
 		if (i < height - 1) {
@@ -107,7 +107,7 @@ void table_print(int **table, void(*printFunction)(), int height, int width, int
 
 void table_print_with_params(int **table, void(*printFunction)(), int height, int width, int cell_size, int param_count, ...) {
 	table_print_top(width, cell_size);
-	for (size_t i = 0; i < height; i++)
+	for (int i = 0; i < height; i++)
 	{
 		va_list ap;
 		va_start(ap, param_count);
